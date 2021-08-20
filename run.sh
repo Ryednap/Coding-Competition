@@ -1,0 +1,1 @@
+g++ -std=c++17 -Wshadow -Wall "$1.cpp" -o "$1"  -O2 -Wno-unused-result -DLOCAL

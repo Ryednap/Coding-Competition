@@ -1,0 +1,24 @@
+
+# variables
+red=`tput setaf 1`
+green=`tput setaf 2`
+reset=`tput sgr0`
+
+#preprocessing
+rm $1;
+rm $2;
+bash run.sh $1 $1;
+bash run.sh $2 $2;
+
+#execution
+for((i = 0; ; ++i)); do
+	./gen $i > in;
+	./$1 < in > out1;
+	./$2 < in > out2;
+	if cmp -s out1 out2; then 
+		echo "Case $i ${green}PASSED ${reset}"
+	else
+		echo "Case $i ${red}FAILED ${reset}"
+		break
+	fi
+done
