@@ -6,66 +6,93 @@ using namespace std;
 
 using vi = vector<int>;
 using vvi = vector<vi>;
+using vvvi = vector<vvi>;
 using pii = pair<int, int>;
 using vpi = vector<pii>;
-using vvpi = vector<vpi>;
 
 #define f first
 #define s second
 
-vvi edges;
-vi low, tin;
-int timer = 0;
-vector<pii> bridges;
 
-void dfs (int node, int par) {
+vvi edges;
+vi tin, low, instck;
+stack<int> st;
+int timer = 0;
+vi sc, indeg;
+
+void dfs (int node) {
 	tin[node] = low[node] = ++timer;
+	instck[node] = true; st.push(node);
 	for (int child : edges[node]) {
-		if (tin[child] == -1) {
-			dfs (child, node);
+		if (tin[child] == -1) 
+			dfs (child);
+		if (instck[child])
 			low[node] = min (low[node], low[child]);
-			if (low[child] > tin[node]) {
-				bridges.emplace_back(node,child);
+	}
+	if (low[node] == tin[node]) {
+		int who = -1;
+		while (true) { 
+			int v = st.top(); st.pop();
+			if (who == -1 || indeg[who] > indeg[v]){
+				who = v;
 			}
-		} else if(child != par) {
-			low[node] = min (low[node], tin[child]);
+			instck[v] = false;
+			if (v == node)
+				break;
 		}
+		sc.push_back(who);
 	}
 }
 
 int main () {
-	int n, m;
-	while (scanf ("%d %d", &n, &m)) {
-		if (!n && !m)
-			break;
+	int qq;
+	scanf ("%d", &qq);
+	for (int tt = 1; tt <= qq; ++tt) {
+		printf ("Case %d: ", tt);
+		int n, m;
+		scanf ("%d %d", &n, &m);
+	//  init 
 		edges = vvi(n);
-		low = tin = vi(n, -1);
+		tin = low = vi(n, -1);
+		instck = indeg = vi(n);
+		sc.clear();
 		timer = 0;
-		bridges = vector<pii>();
+	// end
 		for (int i = 0; i < m; ++i) {
 			int a, b;
 			scanf ("%d %d", &a, &b);
+			--a, --b;
 			edges[a].push_back(b);
-			edges[b].push_back(a);
+			indeg[b]++;
 		}
-		dfs (0, -1);
-		for (auto & p : bridges) {
-			if (p.f > p.s)
-				swap(p.f, p.s);
-		}
-		sort(bridges.begin(), bridges.end(), [&](const pii & a, const pii & b) {
-			if(a.f == b.f)
-				return a.s < b.s;
-			return a.f < b.f;
-		});
-		printf ("%d", (int)bridges.size());
-		if (!bridges.empty()) {
-			printf ("% d %d", bridges[0].f, bridges[0].s);
-			for (int i = 1; i < (int)bridges.size(); ++i) {
-				printf(" %d %d", bridges[i].f, bridges[i].s);
+		for (int i = 0; i < n; ++i) {
+			if (tin[i] == -1) {
+				dfs (i);
 			}
 		}
-		puts("");
+		sort (sc.begin(), sc.end(), [&] (const int & a, const int & b){
+			return indeg[a] < indeg[b];
+		});
+
+		if (tt == 65) {
+			debug() << owo(edges) owo(sc);
+		}
+		int ans = 0;
+		vi vis(n);
+		function < void(int) > dfs2 = [&] (int node) -> void {
+			vis[node] = true;
+			for (int child : edges[node]) {
+				if (!vis[child])
+					dfs2 (child);
+			}
+		};
+		for (int & x : sc) {
+			if (!vis[x]) {
+				dfs2(x);
+				++ans;
+			}
+		}
+		printf ("%d\n", ans);
 	}
 	return 0;
 }

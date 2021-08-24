@@ -10,7 +10,6 @@ void Solve() {
 	scanf("%d %d", &n, &k);
 	string s;
 	cin >> s;
-	
 	int cnt = 0;
 	for(int i = 0, j = n - 1; i < j; ++i,--j) {
 		if(s[i] != s[j]) {
@@ -29,5 +28,10 @@ int main() {
 		printf("Case #%d: ", i + 1);
 		Solve();
 	}
+	return 0;
+}
+
+
+int main () {
 	return 0;
 }
