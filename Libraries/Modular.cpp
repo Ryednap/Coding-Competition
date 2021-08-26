@@ -5,74 +5,105 @@ using namespace std;
 #define "uj.h"
 #endif
 
-template<typename T> T Gcd(T a, T b) { return b ? Gcd(b, a%b) : a ;}
-template<typename T, typename U> T Gcd(T a, T b, U & x, U & y){
-	if(b){
-		U x1, y1;
-		T d = Gcd(b, a%b, x1, y1);
-		x = y1;
-		y = x1 - a/b * y1;
-		return d;
-		
-	} else {
-		x = 1, y = 0;
-		return a;
-	}
-} 
 
-extern const int Mod = (int)1e9 + 7;
+constexpr int Mod  = (int)1e9 + 7;
+    
+template<class T>
+class Modular {
+ public:
+    explicit Modular () {}
+    Modular (T & x) : v((x % Mod + Mod)%Mod) {}
+    Modular (const Modular & m) {
+        this-> v = m.v;
+    }
+    ~Modular() {}
 
-template<typename T> static T Add(T a, T b){
-	return ( ( a + b)%Mod + Mod)%Mod;
-}
-template<typename T> static void Add(T * a, T b){
-	*a = Add(*a, b);
-}
-template<typename T> static T Mul(T a, T b){
-	return ((static_cast<int64_t>(a) * b)%Mod + Mod)%Mod;
-}
-template<typename T> static void Mul(T * a, T b){
-	*a = Mul(*a, b);
-}
-template<typename T> static T Sub(T a, T b){
-	return ( ( a - b)%Mod + Mod)%Mod;
-}
-template<typename T> static void Sub(T * a, T b){
-	*a = Sub(*a, b);
-}
-
-int modInv(int a){
-	int x, y;
-	int d = Gcd(a, Mod, x, y);
-	if(d != 1){
-		printf("Modular Inverse for %d doesnot exist. d = %d\n", a, d);
-		assert(false);
-	}
-	return Add(x, 0);
-}
-
-int powMod(int a, int b){
-	int res = 1;
-	for(; b ; b >>= 1){
-		if( b & 1) Mul(&res, a);
-		Mul(&a, a);
-	}
-	return res;
-}
+    template <typename U>
+    static U inverse (U a, U m = Mod) {
+        U u = 0, v = 1;
+        try {
+            while (a > 0) {
+                T t =  m / a;
+                m -= t * a;
+                u -= t * v;
+                swap(a, m); swap(u, v);
+            }
+            if (m != 1) throw std :: logic_error ("Modular Inverse doesn't exist!!");
+        } catch (std :: exception & e) {
+            throw e;
+        }
+    }         
+    
+    Modular operator + (const Modular & rhs) const { Modular res = *this; return res += rhs;}
+    Modular operator - (const Modular & rhs) const { Modular res = *this; return res -= rhs;}
+    Modular operator * (const Modular & rhs) const { Modular res = *this; return res *= rhs;}
+    Modular operator / (const Modular & rhs) const { try {Modular res = *this; return res /= rhs;
+                                                         } catch (std :: exception & e) {throw e;}}
+    Modular operator - () const { return Modular (-v);}
+    Modular operator ++ () {return *this += 1;}
+    Modular operator -- () {return *this -= 1;}
+    Modular operator ++ (int) {Modular res = *this; *this += 1; return res;}
+    Modular operator -- (int) {Modular res = *this; *this -= 1; return res;}
+ 
 
 
-void solve(){
-	
-	
-	
+    Modular & operator += (const Modular & rhs) { v = ((v + rhs.v)%Mod + Mod)%Mod; return *this;}
+    Modular & operator -= (const Modular & rhs) { v = ((v - rhs.v)%Mod + Mod)%Mod; return *this;}
+    Modular & operator *= (const Modular & rhs) { v = ((1ll * v * rhs.v)%Mod + Mod)%Mod; return *this;}
+    Modular & operator /= (const Modular & rhs) { try { v = *this * (Modular(inverse(rhs.v))); return *this;
+                                                      } catch (std :: exception & e) {throw e;} }
+
+
+    bool operator == (const Modular & rhs) const { return (v == rhs.v);}
+    bool operator != (const Modular & rhs) const { return (v != rhs.v);}
+    
+    template <typename U>
+    Modular operator + (const U & val) const {return *this + Modular(val);}
+    template <typename U>
+    Modular operator += (const U & val) {return *this += Modular(val);}
+    template <typename U>
+    Modular operator - (const U & val) const {return *this - Modular(val);}
+    template <typename U>
+    Modular operator -= (const U & val) {return *this -= Modular(val);}
+    template <typename U>
+    Modular operator * (const U & val) {return *this * Modular(val);}
+    template <typename U>
+    Modular operator *= (const U & val) {return *this *= Modular(val);}
+    template <typename U>
+    friend bool operator < (const Modular<U>&, const Modular<U>&);
+    template<typename U, typename Z>
+    friend Modular<U>  modPow (const Modular<U> &, const Z & val);
+    
+
+ private:
+    T v;
+};
+
+template<typename U>
+bool operator < (const Modular<U> & lhs, const Modular<U> &rhs) {
+    return lhs.v < rhs.v;
+}
+template<typename T, typename U>
+Modular<T> modPow(const Modular<T> & a, const U & b) {
+    Modular<T> res (0);
+    for (; b; b >>= 1) {
+        if (b & 1) {
+            res *= a;
+        }
+        a *= a;
+    }
+    return res;
 }
 
+using Mint = Modular<int>;
+using Mint64_t = Modular<int64_t>;
 
-int main(){
-	int tt;
-	scanf("%d",&tt);
-	for(int i = 0; i < tt; ++i){
-		solve();
-	}
-	return 0;	
+int main () {
+   int tt;
+   scanf("%d", &tt);
+   for (int qq = 0; qq < tt; ++qq) {
+      // printf("Case #%d:\n", qq + 1);
+    
+  }
+   return 0;
 }
