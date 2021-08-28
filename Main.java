@@ -10,32 +10,18 @@ public class Main{
 	public static void main(String[] args) {
 		Problems ob = new Problems();
 		int n = fs.nextInt();
-		int m = fs.nextInt();
-		int [][] arr = new int[n][m];
-		for ( int i = 0; i < n; ++i ) {
-			arr[i] = fs.readArray(m);
+		String [] s = new String[n];
+		for (int i = 0; i < n; ++i) {
+			s[i] = fs.next();
 		}
-		ob.temperatureInterface(arr);
-
-		// int n = fs.nextInt();
-		// int [] arr = fs.readArray(n);
-		// int [] ans = ob.ballotReader(arr);
-		// System.out.println("The number of spoiled votes " + ans[5]);
-		// System.out.println("The Distribution ");
-		// for (int i = 0; i < 5; ++i) {
-		// 	System.out.printf("%d ", ans[i]);
-		// }
-		// System.out.println();
-		// int n = fs.nextInt();
-		// String [] s = new String [n];
-		// for (int i = 0; i < n; ++i) {
-		// 	s[i] = fs.next();
-		// }
-		// int [][] arr = new int [n][3];
-		// for (int i = 0; i < n;  ++i) {
-		// 	arr[i] = fs.readArray(3);
-		// }
-		// System.out.println("position of India is " + ob.position(s, arr));
+		int [][] medal = new int[n][3];
+		for (int i = 0; i < n; ++i) {
+			medal[i] = fs.readArray(3);
+		}
+		int [] res = ob.countryTotal(s, medal);
+		for (int i = 0; i < n; ++i) {
+			System.out.println("Country Total for " + s[i] + " = " + res[i]);
+		}
 	}
 }
 
@@ -185,4 +171,3 @@ class Problems {
 		return ans;
 	}
 }
-
