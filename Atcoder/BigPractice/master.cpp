@@ -103,15 +103,35 @@ ostream & operator << (ostream & out, const Modular<T>&m) {
     return out << m.v;
 }
 
-using Mint = Modular<int>;
-using Mint64_t = Modular<int64_t>;
-using i64 = int64_t;
+ using Mint = Modular<int64_t>;
 
 int main () {
     ios::sync_with_stdio(false);
-    int qq; scanf("%d", &qq);
-    for (int tt = 1; tt <= qq; ++tt) {
-        cout << "Case #" << tt << ": ";
-    }
+    int n;
+    std :: string s;
+    cin >> n >> s;
+    using vMint = vector<Mint>;
+    using vvMint = vector<vMint>;
+
+    vector<vvMint> dp (n, vvMint((1 << 10) + 10, vMint(28, -1)));
+
+    function < Mint (int, int, int ) > solve = [&] (int i, int j, int k) -> Mint {
+        if (i == n) {
+            if (__builtin_popcount(j) == 0)
+                return 0;
+            return 1;
+        }
+        Mint & ans = dp[i][j][k];
+        if (ans != -1)
+            return ans;
+        ans = 0;
+        int c = s[i] - 'A';
+        ans += solve(i + 1, j, k);
+        if (!(j & ( 1 << c)) || (c + 1 == k)) {
+            ans += solve(i + 1, (j | (1 << c)), c + 1);
+        }
+        return ans;
+    };  
+    cout << solve(0, 0, 0) << '\n';
     return 0;
 }
