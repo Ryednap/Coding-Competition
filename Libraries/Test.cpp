@@ -1,5 +1,21 @@
 #include <bits/stdc++.h>
 using namespace std;
+#ifdef LOCAL
+#include "uj.h"
+#endif
+
+/**
+ * @Function objects 
+ * 
+ * plus
+ * minus
+ * multiplies
+ * divides
+ * modulus
+ * bit_and
+ * bit_or
+ * bir_xor
+ */
 
 template<typename T>
 struct Minimum {
@@ -36,12 +52,13 @@ struct SegmentTree {
 	void init (int i, int a, int b) {
 		lo[i] = a; hi[i] = b;
 		if (a == b) {
-			if (!v.empty()) st[i] = v[a];
+			if (!v.empty())  st[i] = v[a];
 			return;
 		}
 		int m = (a + b) >> 1;
 		init ((i << 1), a, m);
 		init ((i << 1) + 1, m + 1, b); 
+        st[i] = operation(st[i << 1], st[(i << 1) + 1]);
 	}
 
 	T query (int a, int b) {return query(1, a, b);} // range query
@@ -73,5 +90,16 @@ Minimum<int> MiniInt;
 
 
 int main () {
+    int n, q;
+    scanf ("%d %d",&n, &q);
+    vector<long long> a(n);
+    for (long long & x : a) scanf ("%lld",&x);
+    SegmentTree<long long,plus<long long>> st(a, 0, plus<long long>());
+    while (q--) {
+        int c, l, r;
+        scanf ("%d %d %d", &c, &l, &r);
+        if (c == 2) printf ("%lld\n", st.query(l - 1, r - 1));
+        else st.update(l - 1, r);
+    }
 	return 0;
 }

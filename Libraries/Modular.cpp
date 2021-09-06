@@ -11,7 +11,6 @@ long long check = 0;
 template<class T>
 class Modular {
  public:
-    explicit Modular () {}
     Modular (T x = 0) {
         v = ((x%Mod) + Mod)%Mod;
     }
