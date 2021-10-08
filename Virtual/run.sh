@@ -1,1 +1,0 @@
-g++ "$1.cpp" -o $1 -Wall -DLOCAL -Wshadow -fsanitize=address -Wall

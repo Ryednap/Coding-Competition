@@ -1,105 +1,131 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
+#define sim template < class c
+#define ris return * this
+#define dor > debug & operator <<
+#define eni(x) sim > typename \
+  enable_if<sizeof dud<c>(0) x 1, debug&>::type operator<<(c i) {
+sim > struct rge { c b, e; };
+sim > rge<c> range(c i, c j) { return rge<c>{i, j}; }
+sim > auto dud(c* x) -> decltype(cerr << *x, 0);
+sim > char dud(...);
+struct debug {
 #ifdef LOCAL
-#include "uj.h"
+~debug() { cerr << endl; }
+eni(!=) cerr << boolalpha << i; ris; }
+eni(==) ris << range(begin(i), end(i)); }
+sim, class b dor(pair < b, c > d) {
+  ris << "(" << d.first << ", " << d.second << ")";
+}
+sim dor(rge<c> d) {
+  *this << "[";
+  for (auto it = d.b; it != d.e; ++it)
+    *this << ", " + 2 * (it == d.b) << *it;
+  ris << "]";
+}
+#else
+sim dor(const c&) { ris; }
 #endif
-
-/**
- * @Function objects 
- * 
- * plus
- * minus
- * multiplies
- * divides
- * modulus
- * bit_and
- * bit_or
- * bir_xor
- */
-
-template<typename T>
-struct Minimum {
-	T operator () (const T & lhs, const T & rhs) const {
-		return std :: min (lhs, rhs);
-	}
 };
+#define owo(...) " [" << #__VA_ARGS__ ": " << (__VA_ARGS__) << "] "
 
-template<typename T>
-struct Maximum {
-	T operator () (const T & lhs, const T & rhs) const {
-		return std :: max(lhs, rhs);
-	}
-};
+constexpr int Mod = 998244353;
+template <typename T>
+T inv(T a, T m = Mod) {
+  T u = 0, v = 1;
+  while (a != 0) {
+    T t = m / a;
+    m -= t * a; swap(a, m);
+    u -= t * v; swap(u, v);
+  }
+  assert(m == 1);
+  return u;
+}
 
-template<typename T, typename AssociativeOperation>
-struct SegmentTree {
-	SegmentTree (vector<T> arr, T _identity, AssociativeOperation op) : 
-			v(arr), identity(_identity), operation(op) {
-		const int n = (int)arr.size();
-		lo.resize(4 * n + 1);
-		hi.resize(4 * n + 1);
-		st.resize(4 * n + 1, identity);
-		init (1, 0, n - 1);
-	}
-	SegmentTree (int n, T _identity, AssociativeOperation op) : 
-			identity(_identity), operation(op) {
-		lo.resize(4 * n + 1);
-		hi.resize(4 * n + 1);
-		st.resize(4 * n + 1, identity);
-		init (1, 0, n - 1);
-	}
 
-	void init (int i, int a, int b) {
-		lo[i] = a; hi[i] = b;
-		if (a == b) {
-			if (!v.empty())  st[i] = v[a];
-			return;
-		}
-		int m = (a + b) >> 1;
-		init ((i << 1), a, m);
-		init ((i << 1) + 1, m + 1, b); 
-        st[i] = operation(st[i << 1], st[(i << 1) + 1]);
-	}
+template<class type>
+class Modular {
+public:
+    constexpr Modular () = default;
+    Modular (type x) : value (norm(x)) {}
+    Modular (const Modular & other) { value = other.value; }
+    
 
-	T query (int a, int b) {return query(1, a, b);} // range query
-	T query (int a) {return query(1, 0, a);} // point query
-	T query (int i, int a, int b) {
-		if (lo[i] > b  || hi[i] < a) return identity;
-		if (lo[i] >= a && hi[i] <= b) return st[i];
-		return operation (query((i << 1), a, b), query((i << 1) + 1, a, b));
-	}
+    Modular operator + (const Modular & rhs)  const { return make_modular (norm (value + rhs. value)); }
+    Modular operator - (const Modular & rhs) const { return make_modular (norm (value - rhs.value)); }
+    Modular & operator += (const Modular & rhs) {value = norm (value + rhs.value); return *this; }
+    Modular & operator -= (const Modular & rhs) {value = norm (value - rhs.value); return *this; }
+    
+    Modular operator * (const Modular & rhs) const { return make_modular (norm (1ll * value * rhs.value)); }    
+    Modular & operator *= (const Modular & rhs) {value = norm (1ll * value * rhs.value); return *this; }
+    Modular operator / (const Modular & rhs) const {return make_modular(norm(1ll * value * inv(rhs.value))); }
+    Modular & operator /= (const Modular & rhs) { value = norm(1ll * value * inv(rhs.value)); return *this; }
 
-	void update (int pos, T val) {update(1, pos, val);} // point update
-	void update (int i, int pos, T val) {
-		if (lo[i] > pos || hi[i] < pos) return;
-		if (lo[i] == hi[i] && lo[i] == pos) {st[i] = val;return;}
-		update((i << 1), pos, val);
-		update((i << 1) + 1, pos, val);
-		st[i] = operation (st[i << 1], st[(i << 1) + 1]);
-	}
+    Modular & operator ++ () { return *this += 1; }
+    Modular & operator -- () { return *this -= 1; }
+    Modular  operator ++ (type) { Modular res(*this); *this += 1; return res; }
+    Modular  operator -- (type) { Modular res(this); *this -= 1; return res; }
+    explicit operator bool () const  { return value != 0; } // make it explicit; else interrupts with + operator
+    bool operator ! () const  { return !static_cast<bool> (*this); }
+    template<typename T>
+    explicit operator T () const { return static_cast<T> (value); }
+    
+
+    Modular & operator = (const Modular & rhs) {value = rhs.value; return *this; }
+    const type & operator() () const noexcept { return value; }
+    bool operator == (const Modular & rhs) const { return value == rhs.value; }
+    bool operator != (const Modular & rhs) const { return value != rhs.value; }
+
+    template<typename T, typename U>  friend Modular<T> operator + (const U & other, const Modular<T> & m) { return make_modular(norm(other + m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator + (const Modular<T> & m, const U & other) { return make_modular(norm(other + m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator - (const U & other, const Modular<T> & m) { return make_modular(norm(other - m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator - (const Modular<T> & m, const U & other) { return make_modular(norm(other - m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator * (const Modular<T> & m, const U & other) { return make_modular(norm(1ll * other * m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator * (const U & other, const Modular<T> & m) { return make_modular(norm(1ll * other * m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator / (const Modular<T> & m, const U & other) { return make_modular(norm(1ll * other * inv(m.value))); }
+    template<typename T, typename U>  friend Modular<T> operator / (const U & other, const Modular<T> & m) { return make_modular(norm(1ll * other * inv(m.value))); }
+    template<typename T, typename U>  friend bool operator == (const U & other, const Modular<T> & m) { return m.value == other; }
+    template<typename T, typename U>  friend bool operator == (const Modular<T> & m, const U & other) { return m.value == other; }
+    template<typename T, typename U>  friend bool operator != (const U & other, const Modular<T> & m) { return m.value != other; }
+    template<typename T, typename U>  friend bool operator != (const Modular<T> & m, const U & other) { return m.value != other; }
+
+    template<typename T>
+    friend istream & operator >> (istream & in, Modular<T> & m) {
+        type x;  in >> x;
+        m.value = norm(x);
+        return in;
+    }
+
+    template<typename T>
+    friend ostream & operator << (ostream & out, const Modular<T> & m) { return (out << m.value); }
+
 
 private:
-	vector<T> st, v;
-	vector<int> lo, hi;
-	T identity;
-	AssociativeOperation operation;
+    type value;
+    template<typename U> static const U norm (const U & x) { return (x % Mod + Mod)%Mod; }
+    static const Modular make_modular (const type & x) {Modular m; m.value = x; return m; }
 };
 
-Maximum<int> MaxiInt;
-Minimum<int> MiniInt;
+using Mint = Modular<int>;
+using M64_t = Modular<int64_t>;
+
+
+vector<Mint> fact(1, 1);
+vector<Mint> inv_fact(1, 1);
+
+/* Mint nCk (int n, int k) {
+     if (k < 0 || k > n) {
+    return 0;
+  }
+  while ((int) fact.size() < n + 1) {
+    fact.push_back(fact.back() * (int) fact.size());
+    inv_fact.push_back(1 / fact.back());
+  }
+  return fact[n] * inv_fact[k] * inv_fact[n - k];
+}
+  */
 
 
 int main () {
-    int n, q;
-    scanf ("%d %d",&n, &q);
-    vector<long long> a(n);
-    for (long long & x : a) scanf ("%lld",&x);
-    SegmentTree<long long,plus<long long>> st(a, 0, plus<long long>());
-    while (q--) {
-        int c, l, r;
-        scanf ("%d %d %d", &c, &l, &r);
-        if (c == 2) printf ("%lld\n", st.query(l - 1, r - 1));
-        else st.update(l - 1, r);
-    }
 	return 0;
 }

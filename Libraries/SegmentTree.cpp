@@ -42,17 +42,19 @@ struct SegmentTree {
 		int m = (a + b) >> 1;
 		init ((i << 1), a, m);
 		init ((i << 1) + 1, m + 1, b); 
+		st[i] = operation (st[i << 1], st[(i << 1) + 1]);
 	}
 
 	T query (int a, int b) {return query(1, a, b);} // range query
 	T query (int a) {return query(1, 0, a);} // point query
+	void update (int pos, T val) {update(1, pos, val);} // point update
+
+private:
 	T query (int i, int a, int b) {
 		if (lo[i] > b  || hi[i] < a) return identity;
 		if (lo[i] >= a && hi[i] <= b) return st[i];
 		return operation (query((i << 1), a, b), query((i << 1) + 1, a, b));
 	}
-
-	void update (int pos, T val) {update(1, pos, val);} // point update
 	void update (int i, int pos, T val) {
 		if (lo[i] > pos || hi[i] < pos) return;
 		if (lo[i] == hi[i] && lo[i] == pos) {st[i] = val;return;}

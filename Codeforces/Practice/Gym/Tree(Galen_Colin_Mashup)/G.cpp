@@ -1,107 +1,74 @@
-#include<bits/stdc++.h>
-using namespace std;
-
-#ifdef LOCAL
-#include "uj.h"
-#endif
-
-const int nax = (int)2e5 + 10;
-vector<int> edges[nax];
-set<int> v[nax];
-vector<int> fact(nax, -1);
-
-void Sieve() {
-	vector<bool> p(nax, true);
-	p[0] = p[1] = false;
-	for(int i = 2; i < nax; ++i) {
-		if(p[i]) {
-			fact[i] = i;
-	
-			for(int j  = 2; i * j < nax; ++j) {
-				p[i * j] = false;
-				if(fact[i * j] == -1) fact[i *j] = i ;
-			}
-		}
-	}
+// include the library code for LCD
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+float value;
+int pressureinbar = 0;
+String ssid
+= "Simulator Wifi"; // SSID to connect to
+String password = ""; // Our virtual wifi has no password (so dont do your banking
+String host
+= "api.thingspeak.com"; // Open Weather Map API
+const int httpPort = 80;
+String uri
+= "/update?api_key=PWVX09BUXSNJ7IGJ&field1=";
+int setupESP8266(void) {
+// Start our ESP8266 Serial Communication
+Serial.begin(115200); // Serial connection over USB to computer
+Serial.println("AT"); // Serial connection on Tx / Rx port to ESP8266
+delay(10);
+// Wait a little for the ESP to respond
+if (!Serial.find("OK")) return 1;
+// Connect to 123D Circuits Simulator Wifi
+Serial.println("AT+CWJAP=\"" + ssid + "\",\"" + password + "\"");delay(10);
+// Wait a little for the ESP to respond
+if (!Serial.find("OK")) return 2;
+// Open TCP connection to the host:
+Serial.println("AT+CIPSTART=\"TCP\",\"" + host + "\"," + httpPort);
+delay(50);
+// Wait a little for the ESP to respond
+if (!Serial.find("OK")) return 3;
+return 0;
 }
-
-void Factorize(int a, int b ) {
-	while(a > 1) {
-		int x = fact[a];
-		assert(x != -1);
-		v[x].insert(b);
-		a /= x;
-	}
+void anydata(int pressureinbar) {
+	int temp = map(analogRead(A0),20,358,-40,125);
+	int tempi = map(pressureinbar,20,358,-40,125);
+// Construct our HTTP call
+	String httpPacket = "GET " + uri + String(temp) + "&field2=" + String(tempi) + "HTTP/1.1\r\nHost: " + host + "\r\n\r\n";
+	int length = httpPacket.length();
+// Send our message length
+	Serial.print("AT+CIPSEND=");
+Serial.println(length);delay(10); // Wait a little for the ESP to respond if (!Serial.find(">")) return -1;
+// Send our http request
+Serial.print(httpPacket);
+delay(10); // Wait a little for the ESP to respond
+if (!Serial.find("SEND OK\r\n")) return;
 }
-
-int h[nax];
-void Dfs0(int node, int par, int ht) {
-	h[node] = ht;
-	for(int child : edges[node]) {
-		if(child != par) {
-			Dfs0(child, node, ht + 1);
-		}
-	}
+void setup() {
+// set up the LCD's number of columns and rows:
+	lcd.begin(16, 2);
+	setupESP8266();
 }
-
-int main() {
-	Sieve();
-	int n;
-	scanf("%d" , &n);
-	for(int i = 1; i <= n; ++i) {
-		int x;
-		scanf("%d", &x);
-		Factorize(x, i);
+void loop() {
+// set the cursor to column 0, line 1
+// (note: line 1 is the second row, since counting begins with 0):
+	value = analogRead(A0)*0.004882814;
+	value = (value - 0.5) * 100.0;
+	lcd.setCursor(0,0);
+	lcd.print("Temp:");
+	lcd.print(value);
+	lcd.print("C");
+	float pressureSensorVal = analogRead(A1);float barVoltage = (pressureSensorVal/1024.0) * 5.0;
+	if (pressureSensorVal < 102.00 || pressureSensorVal == 102.00){
+		pressureinbar = 0;
 	}
-	
-	for(int i = 0; i < n - 1; ++i) {
-		int a, b;
-		scanf("%d %d",&a, &b);
-		edges[a].push_back(b);
-		edges[b].push_back(a);
+	else {
+		float pressureinbarToRound = ((barVoltage * 155.0) / 0.5) * 1.333 ;
+		pressureinbar = (int)roundf(pressureinbarToRound);
 	}
-	
-	int answer = 0;
-	
-	Dfs0(1,1, 0);
-	auto cmp = [](const int & a, const int & b) {
-		return h[a] < h[b];
-	};
-	
-	for(int i = 2; i < nax; ++i) {
-		if( (int)v[i].size() == 0) continue;
-		vector<int> tree (v[i].begin() ,v[i].end());
-		sort(tree.begin() , tree.end(), cmp);
-		map<int, int> mark;
-		for(int x : tree) mark[x] = true;
-		
-		function < int(int) > Dfs = [&](int node) {
-			mark[node] = false;
-			int x = 0;
-			for(int child : edges[node]) {
-				if(mark[child]) x = max(x, Dfs(child));
-			}
-			return x + 1;
-		};
-		
-		for(int x : tree) {
-			if(mark[x]) {
-				vector<int> maybe;
-				mark[x] = false;
-				for(int c : edges[x]) {
-					if(mark[c]) {
-						maybe.push_back(Dfs(c));
-					}
-				}
-				sort(maybe.rbegin() , maybe.rend());
-				const int m = (int)maybe.size();
-				int res = 1;
-				for(int j = 0; j < min(2,m); ++j) res += maybe[j];
-				answer = max(answer, res);
-			}
-		}
-	}
-		
-	printf("%d\n", answer);
-	return 0;
+	lcd.setCursor(0,1);
+	lcd.print("Pressure:");
+	lcd.print(pressureinbar);
+	lcd.print("mb");
+	anydata(pressureinbar);
+	delay(10000);
 }

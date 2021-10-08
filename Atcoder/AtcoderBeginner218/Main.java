@@ -5,10 +5,30 @@ import java.util.*;
 
 public class Main {
     static FastScanner fs = new FastScanner();
+    static int n;
+    static ArrayList<Integer> [] tree;
+    static int [] value;
+    static int [] mini, maxi;
+
     public static void main (String [] args) {
-        int n = fs.nextInt();
-        
+        n = fs.nextInt();
+        tree = new ArrayList[n + 1];
+        for (int i = 0; i <= n; ++i) {
+            tree[i] = new ArrayList<Integer>();
+        }
+        value = fs.readIntArray(n);
+        mini = new int[n + 1];
+        maxi = new int[n + 1];
+
+        for (int i = 0; i < n - 1; ++i) {
+            int a = fs.nextInt(), b = fs.nextInt();
+            --a; --b;
+            tree[a].add(b);
+            tree[b].add(a);
+        }
     }
+
+
 }
 
 class FastScanner {

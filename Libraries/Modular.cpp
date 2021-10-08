@@ -1,116 +1,124 @@
 #include<bits/stdc++.h>
 using namespace std;
-
+#define sim template < class c
+#define ris return * this
+#define dor > debug & operator <<
+#define eni(x) sim > typename \
+  enable_if<sizeof dud<c>(0) x 1, debug&>::type operator<<(c i) {
+sim > struct rge { c b, e; };
+sim > rge<c> range(c i, c j) { return rge<c>{i, j}; }
+sim > auto dud(c* x) -> decltype(cerr << *x, 0);
+sim > char dud(...);
+struct debug {
 #ifdef LOCAL
-#include "uj.h"
+~debug() { cerr << endl; }
+eni(!=) cerr << boolalpha << i; ris; }
+eni(==) ris << range(begin(i), end(i)); }
+sim, class b dor(pair < b, c > d) {
+  ris << "(" << d.first << ", " << d.second << ")";
+}
+sim dor(rge<c> d) {
+  *this << "[";
+  for (auto it = d.b; it != d.e; ++it)
+    *this << ", " + 2 * (it == d.b) << *it;
+  ris << "]";
+}
+#else
+sim dor(const c&) { ris; }
 #endif
+};
+#define owo(...) " [" << #__VA_ARGS__ ": " << (__VA_ARGS__) << "] "
 
+constexpr int Mod = 998244353;
+template <typename T>
+T inv (T a, T m = Mod) {
+    T u = 0, v = 1;
+    while (a != 0) {
+        T x = m / a;
+        m -= x * a; swap (a, m);
+        u -= x * a; swap (u, v); 
+    }
+    assert (m == 1);
+    return u;
+}
 
-constexpr int Mod  = 998244353;
-long long check = 0;    
-template<class T>
+template<class type>
 class Modular {
- public:
-    Modular (T x = 0) {
-        v = ((x%Mod) + Mod)%Mod;
-    }
-    Modular (const Modular & m) {
-        this-> v = m.v;
-    }
-    ~Modular() {}
-
-    template <typename U>
-    static U inverse (U a, U m = Mod) {
-        U u = 0, v = 1;
-        try {
-            while (a > 0) {
-                T t =  m / a;
-                m -= t * a;
-                u -= t * v;
-                swap(a, m); swap(u, v);
-            }
-            if (m != 1) throw std :: logic_error ("Modular Inverse doesn't exist!!");
-        } catch (std :: exception & e) {
-            throw e;
-        }
-    }         
+public:
+    constexpr Modular () = default;
+    Modular (type x) : value (norm(x)) {}
+    Modular (const Modular & other) { value = other.value; }
     
-    template<typename U>
-    Modular & operator = (const U  x) {v = x; return *this;}
-    Modular operator + (const Modular & rhs) const { Modular res = *this; return res += rhs;}
-    Modular operator - (const Modular & rhs) const { Modular res = *this; return res -= rhs;}
-    Modular operator * (const Modular & rhs) const { Modular res = *this; return res *= rhs;}
-    Modular operator / (const Modular & rhs) const { try {Modular res = *this; return res /= rhs;
-                                                         } catch (std :: exception & e) {throw e;}}
-    Modular operator - () const { return Modular (-v);}
-    Modular & operator ++ () {return *this += 1;}
-    Modular & operator -- () {return *this -= 1;}
-    Modular operator ++ (int) {Modular res = *this; *this += 1; return res;}
-    Modular operator -- (int) {Modular res = *this; *this -= 1; return res;}
+
+    Modular operator + (const Modular & rhs)  const { return make_modular (norm (value + rhs. value)); }
+    Modular operator - (const Modular & rhs) const { return make_modular (norm (value - rhs.value)); }
+    Modular & operator += (const Modular & rhs) {value = norm (value + rhs.value); return *this; }
+    Modular & operator -= (const Modular & rhs) {value = norm (value - rhs.value); return *this; }
+    
+    Modular operator * (const Modular & rhs) const { return make_modular (norm (1ll * value * rhs.value)); }    
+    Modular & operator *= (const Modular & rhs) {value = norm (1ll * value * rhs.value); return *this; }
+    Modular operator / (const Modular & rhs) const {return make_modular(norm(1ll * value * inv(rhs.value))); }
+    Modular & operator /= (const Modular & rhs) { value = norm(1ll * value * inv(rhs.value)); return *this; }
+
+    Modular operator -() const { return Modular(-value); }
+    Modular & operator ++ () { return *this += 1; }
+    Modular & operator -- () { return *this -= 1; }
+    Modular  operator ++ (type) { Modular res(*this); *this += 1; return res; }
+    Modular  operator -- (type) { Modular res(this); *this -= 1; return res; }
+    explicit operator bool () const  { return value != 0; } // make it explicit; else interrupts with + operator
+    bool operator ! () const  { return !static_cast<bool> (*this); }
+    template<typename T>
+    explicit operator T () const { return static_cast<T> (value); }
+    
+
+    Modular & operator = (const Modular & rhs) {value = rhs.value; return *this; }
+    const type & operator() () const noexcept { return value; }
+    bool operator == (const Modular & rhs) const { return value == rhs.value; }
+    bool operator != (const Modular & rhs) const { return value != rhs.value; }
+
+    template<typename T, typename U>  friend Modular<T> operator + (const U & other, const Modular<T> & m) { return make_modular(norm(other + m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator + (const Modular<T> & m, const U & other) { return make_modular(norm(other + m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator - (const U & other, const Modular<T> & m) { return make_modular(norm(other - m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator - (const Modular<T> & m, const U & other) { return make_modular(norm(other - m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator * (const Modular<T> & m, const U & other) { return make_modular(norm(1ll * other * m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator * (const U & other, const Modular<T> & m) { return make_modular(norm(1ll * other * m.value)); }
+    template<typename T, typename U>  friend Modular<T> operator / (const Modular<T> & m, const U & other) { return make_modular(norm(1ll * other * inv(m.value))); }
+    template<typename T, typename U>  friend Modular<T> operator / (const U & other, const Modular<T> & m) { return make_modular(norm(1ll * other * inv(m.value))); }
+    template<typename T, typename U>  friend bool operator == (const U & other, const Modular<T> & m) { return m.value == other; }
+    template<typename T, typename U>  friend bool operator == (const Modular<T> & m, const U & other) { return m.value == other; }
+    template<typename T, typename U>  friend bool operator != (const U & other, const Modular<T> & m) { return m.value != other; }
+    template<typename T, typename U>  friend bool operator != (const Modular<T> & m, const U & other) { return m.value != other; }
+
+    template<typename T>
+    friend istream & operator >> (istream & in, Modular<T> & m) {
+        type x;  in >> x;
+        m.value = norm(x);
+        return in;
+    }
+
+    template<typename T>
+    friend ostream & operator << (ostream & out, const Modular<T> & m) { return (out << m.value); }
+    template<typename T, typename U>
+    friend Modular<T> power (const Modular<T> & a, const U & b);
+
+private:
+    type value;
+    template<typename U> static const U norm (const U & x) { return (x % Mod + Mod)%Mod; }
+    static const Modular make_modular (const type & x) {Modular m; m.value = x; return m; }
+};
+template<typename T, typename U>
+Modular<T> power(const Modular<T>& a, const U& b) {
+  assert(b >= 0);
+  Modular<T> x = a, res = 1;
+  U p = b;
+  while (p > 0) {
+    if (p & 1) res *= x;
+    x *= x;
+    p >>= 1;
+  }
+  return res;
+}
  
 
-
-    Modular & operator += (const Modular & rhs) { v = ((v + rhs.v)%Mod + Mod)%Mod; return *this;}
-    Modular & operator -= (const Modular & rhs) { v = ((v - rhs.v)%Mod + Mod)%Mod; return *this;}
-    Modular & operator *= (const Modular & rhs) { v = ((1ll * v * rhs.v)%Mod + Mod)%Mod; return *this;}
-    Modular & operator /= (const Modular & rhs) { try { v = *this * (Modular(inverse(rhs.v))); return *this;
-                                                      } catch (std :: exception & e) {throw e;} }
-
-
-    bool operator == (const Modular & rhs) const { return (v == rhs.v);}
-    bool operator != (const Modular & rhs) const { return (v != rhs.v);}
-    
-    template <typename U>
-    Modular operator + (const U & val) const {return *this + Modular(val);}
-    template <typename U>
-    Modular &operator += (const U & val) {return *this += Modular(val);}
-    template <typename U>
-    Modular operator - (const U & val) const {return *this - Modular(val);}
-    template <typename U>
-    Modular &operator -= (const U & val) {return *this -= Modular(val);}
-    template <typename U>
-    Modular operator * (const U & val) {return *this * Modular(val);}
-    template <typename U>
-    Modular &operator *= (const U & val) {return *this *= Modular(val);}
-    template <typename U>
-    friend bool operator < (const Modular<U>&, const Modular<U>&);
-    template<typename U, typename Z>
-    friend Modular<U>  modPow (const Modular<U> &, const Z & val);
-    template<typename U>
-    friend ostream & operator << (ostream & , const Modular<U> &);
- private:
-    T v;
-};
-
-template<typename U>
-bool operator < (const Modular<U> & lhs, const Modular<U> &rhs) {
-    return lhs.v < rhs.v;
-}
-template<typename T, typename U>
-Modular<T> modPow(const Modular<T> & a, const U & b) {
-    Modular<T> res (0);
-    for (; b; b >>= 1) {
-        if (b & 1) {
-            res *= a;
-        }
-        a *= a;
-    }
-    return res;
-}
-template<typename T>
-ostream & operator << (ostream & out, const Modular<T>&m) {
-    return out << m.v;
-}
-
 using Mint = Modular<int>;
-using Mint64_t = Modular<int64_t>;
-using i64 = int64_t;
-
-int main () {
-    ios::sync_with_stdio(false);
-    int qq; scanf("%d", &qq);
-    for (int tt = 1; tt <= qq; ++tt) {
-        cout << "Case #" << tt << ": ";
-    }
-    return 0;
-}
+using M64_t = Modular<int64_t>;

@@ -1,44 +1,14 @@
 #include <bits/stdc++.h>
-using namespace std;
-#ifdef LOCAL
-#include "uj.h"
-#endif
 
 
-
+template<typename T, typename U>
+auto prod (T & a, U & b) -> decltype(a * b) {
+	return a * b;
+}
 
 int main () {
-	int q;
-	scanf ("%d", &q);
-	deque<int> a;
-	set<pair<int, int>> b;
-
-	bool ok = false;
-	 int i = 0;
-	while (q--) {
-		int c;
-		scanf ("%d", &c);
-		if (c == 1) {
-			int x; scanf("%d",&x);
-			a.push_back(x);
-		} else if (c == 2) {
-			if (ok && b.empty()) ok = false;
-			int x;
-			if (ok) {
-				x = b.begin()->first;
-				b.erase(b.begin());
-			} else {
-				x = a.front();
-				a.pop_front();
-			}
-			printf ("%d\n",x);
-		} else {
-			ok= true;
-			while (!a.empty()) {
-				int x = a.front(); a.pop_front();
-				b.insert(pair<int, int> (x, i++));
-			}
-		}
-	}
+	int a = 10, b = 12;
+	auto res = prod(a, b);
+	std :: cout << typeid(res).name() << "\n";
 	return 0;
 }
